@@ -6,6 +6,10 @@ on:
       - 'main'
       - 'dev'
 
+defaults:
+  run:
+    working-directory: ./src
+
 jobs:
   build-and-push-to-ghcr:
     runs-on: ubuntu-latest
@@ -33,7 +37,6 @@ jobs:
         if: github.ref_name == 'dev'
         uses: docker/build-push-action@v6
         with:
-          context: ./src
           platforms: linux/amd64
           push: true
           tags: ${{ github.repository }}:${{ github.sha }}

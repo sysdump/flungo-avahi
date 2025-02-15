@@ -7,7 +7,7 @@ on:
       - 'dev'
 
 jobs:
-  docker:
+  build-and-push-to-ghcr:
     runs-on: ubuntu-latest
     steps:
       - name: Login to GitHub Container Registry
@@ -36,4 +36,4 @@ jobs:
           context: src
           platforms: linux/amd64
           push: true
-          tags: sysdump/flungo-avahi:{{sha}}
+          tags: ${{ github.repository }}:${{ github.sha }}

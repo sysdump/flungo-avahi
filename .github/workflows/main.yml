@@ -29,11 +29,11 @@ jobs:
           push: true
           tags: sysdump/flungo-avahi:latest
 
-      - name: Build and push latest
+      - name: Build and push dev
         if: github.ref_name == 'dev'
         uses: docker/build-push-action@v6
         with:
-          context: src
+          context: ./src
           platforms: linux/amd64
           push: true
           tags: ${{ github.repository }}:${{ github.sha }}

@@ -1,9 +1,19 @@
 #!/bin/sh -e
-
+echo "Starting"
 if [ "${DEBUG}" == "true" ]; then
   set -x
 fi
 
+# if [ -n "${SERVER_ENABLE_DBUS}" ]; then
+#   if [ ! -d "/var/run/dbus" ]; then
+#     mkdir /var/run/dbus/
+#   fi
+#   if [ ! "apk -e info dbus" ] && [ ! "apk -e info avahi-tools" ]; then
+#     >&2 echo "dbus and avahi-tools already installed"
+#   else
+#     apk add --no-cache dbus avahi-tools
+#   fi
+# fi
 
 AUG_BASE="/files/etc/avahi/avahi-daemon.conf"
 
@@ -177,6 +187,32 @@ if [ -f "${PID_FILE}" ]; then
   fi
 fi
 
+# DBUS
+
+if [ -n "${SERVER_ENABLE_DBUS}" ]; then
+  PID_FILE=/run/dbus/dbus.pid
+  if [ -f "${PID_FILE}" ]; then
+    DBUS_PID="$(cat "${PID_FILE}")"
+    >&2 echo "Found PID file (${PID_FILE}) in container with PID ${DBUS_PID}"
+    if [ -z "${DBUS_PID}" ]; then
+      >&2 echo "PID file is empty, cleaning up"
+      >&2 rm -v "${PID_FILE}"
+    elif [ "$$" == "${DBUS_PID}" ]; then
+      >&2 echo "PID matches the current script"
+      >&2 echo "Safe to assume a previous instance of avahi exited uncleanly"
+      >&2 rm -v "${PID_FILE}"
+    elif [ ! -d "/proc/${DBUS_PID}" ]; then
+      >&2 echo "PID not found in current namespace"
+      >&2 echo "Safe to assume a previous instance of avahi exited uncleanly"
+      >&2 rm -v "${PID_FILE}"
+    else
+      >&2 echo "PID is running, are you trying to start another instance?"
+      >&2 echo "Exiting without starting avahi"
+      exit 1
+    fi
+  fi
+  dbus-daemon --system
+fi
 
 # Execute the provided command
 if [ $# == 0 ] || [ "${1:0:1}" == "-" ]; then

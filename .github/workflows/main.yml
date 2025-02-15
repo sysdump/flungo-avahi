@@ -36,4 +36,4 @@ jobs:
           context: "{{defaultContext}}:src"
           platforms: linux/amd64
           push: true
-          tags: ${{ github.repository }}:${{ github.sha }}
+          tags: ghcr.io/${{ github.repository }}:${{ github.sha }}
